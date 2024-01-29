@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "kba-exa-roboqa"
+version = "0.1.0"
+description = ""
+authors = ["Pavel Zemlianikin <zzzp@kbais.org>"]
+packages = [{include = "roboqa_web", from = "packages"}]
+readme = "README.md"
+
+[tool.poetry.scripts]
+start = "uvicorn"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0.post1"}
+aiogram = "^3.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
