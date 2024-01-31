@@ -15,7 +15,7 @@ from pydantic import BaseModel, TypeAdapter, Field
 from starlette.middleware.cors import CORSMiddleware
 
 from roboqa_web.config import AppConfig, TomlAppConfig
-from roboqa_web.runners.runner_bg import handle_publish_issue
+from roboqa_web.runners.runner_bg import handle_publish_issue_to_github
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
@@ -95,7 +95,7 @@ async def get_github_project_service(
     github_client_transport = AIOHTTPTransport(
         url='https://api.github.com/graphql',
         headers={
-            f'Authorization': f'Bearer {gh_client_config['api_key']}'
+            f"Authorization": f"Bearer {gh_client_config['api_key']}"
         }
     )
 
@@ -151,7 +151,7 @@ class FeedbackRequestDto(BaseModel):
 
 @issues_router.get("/bg")
 async def handle_bg():
-    handle_publish_issue.delay(str(uuid.uuid4()))
+    handle_publish_issue_to_github.send(str(uuid.uuid4()))
 
 
 @issues_router.post('/')
@@ -161,7 +161,7 @@ async def handle_issue_register(
 ):
     issue_id = await project_service.create_issue(req.title, req.content)
 
-    issue_url = (f"https://github.com/{project_service.project_info["owner"]}/projects/"
+    issue_url = (f"https://github.com/{project_service.project_info['owner']}/projects/"
                  f"{project_service.project_info['project_id']}"
                  f"?pane=issue"
                  f"&itemId={issue_id}")

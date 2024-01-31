@@ -14,12 +14,10 @@ python = "^3.11"
 fastapi = "^0.109.0"
 uvicorn = {extras = ["standard"], version = "^0.27.0.post1"}
 aiogram = "^3.3.0"
-apscheduler = { git = "https://github.com/agronholm/apscheduler.git" }
 gql = {extras = ["aiohttp"], version = "^3.5.0"}
-celery = "^5.3.6"
-flower = "^2.0.1"
 redis = "^5.0.1"
 dependency-injector-fork = "^4.42.1"
+dramatiq = {extras = ["redis", "watch"], version = "^1.16.0"}
 
 [build-system]
 requires = ["poetry-core"]
