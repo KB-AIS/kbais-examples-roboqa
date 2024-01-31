@@ -7,7 +7,7 @@ packages = [{include = "roboqa_web", from = "packages"}]
 readme = "README.md"
 
 [tool.poetry.scripts]
-start = "uvicorn"
+web_start = "packages.roboqa_web.main:run"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -16,6 +16,10 @@ uvicorn = {extras = ["standard"], version = "^0.27.0.post1"}
 aiogram = "^3.3.0"
 apscheduler = { git = "https://github.com/agronholm/apscheduler.git" }
 gql = {extras = ["aiohttp"], version = "^3.5.0"}
+celery = "^5.3.6"
+flower = "^2.0.1"
+redis = "^5.0.1"
+dependency-injector-fork = "^4.42.1"
 
 [build-system]
 requires = ["poetry-core"]

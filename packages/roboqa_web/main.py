@@ -1,16 +1,21 @@
+import asyncio
 import logging
 import sys
-from typing import Annotated, AsyncIterator, TypedDict
+import uuid
+from typing import Annotated, AsyncIterator, TypedDict, Optional
 
+import uvicorn
 from aiogram import Bot
 from aiogram.enums import ParseMode
 from fastapi import FastAPI, APIRouter, Depends
 from gql import Client, gql
 from gql.client import AsyncClientSession
 from gql.transport.aiohttp import AIOHTTPTransport
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, TypeAdapter, Field
+from starlette.middleware.cors import CORSMiddleware
 
 from roboqa_web.config import AppConfig, TomlAppConfig
+from roboqa_web.runners.runner_bg import handle_publish_issue
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
@@ -134,36 +139,62 @@ class TelegramNotificator:
         ...
 
 
-issues_router = APIRouter(prefix='/api/v1/issues')
+issues_router = APIRouter(prefix="/api/v1/issues")
 
 
 class FeedbackRequestDto(BaseModel):
-    author_name: str | None
-    is_issue: bool
-    title: str
-    content: str | None
+    title:      str
+    authorName: Optional[str]  = Field(default=None)
+    isIssue:    Optional[bool] = Field(default=None)
+    content:    Optional[str]  = Field(default=None)
+
+
+@issues_router.get("/bg")
+async def handle_bg():
+    handle_publish_issue.delay(str(uuid.uuid4()))
 
 
 @issues_router.post('/')
-async def handle_register_feedback(
+async def handle_issue_register(
         req: FeedbackRequestDto,
         project_service: Annotated[GithubProjectsService, Depends(get_github_project_service)]
 ):
     issue_id = await project_service.create_issue(req.title, req.content)
 
-    issue_url = (f'https://github.com/{project_service.project_info['owner']}/projects/'
-                 f'{project_service.project_info['project_id']}'
-                 f'?pane=issue'
-                 f'&itemId={issue_id}')
+    issue_url = (f"https://github.com/{project_service.project_info["owner"]}/projects/"
+                 f"{project_service.project_info['project_id']}"
+                 f"?pane=issue"
+                 f"&itemId={issue_id}")
 
     return issue_url
 
 
-def setup_app_runner() -> FastAPI:
+def setup_app_composer() -> FastAPI:
     app_composer = FastAPI()
     app_composer.include_router(issues_router)
+
+    app_composer.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     return app_composer
 
 
-app = setup_app_runner()
+async def run_async():
+    app_config = uvicorn.Config("roboqa_web.main:setup_app_composer", host='0.0.0.0', port=5000, log_level="debug")
+    app_runner = uvicorn.Server(app_config)
+
+
+    await app_runner.serve()
+
+
+def run():
+    asyncio.run(run_async())
+
+
+if __name__ == "__main__":
+    run()
