@@ -50,7 +50,7 @@ class Container(containers.DeclarativeContainer):
 @inject
 async def handle_publish_issue_to_github(
         issue_uuid: str,
-        use_case: UseCase = Provide[Container.publishToGithubUseCase]
+        use_case: UseCase[str, None] = Provide[Container.publishToGithubUseCase]
 ):
     await use_case.execute(issue_uuid)
 
