@@ -15,9 +15,7 @@ from pydantic import BaseModel, TypeAdapter, Field
 from starlette.middleware.cors import CORSMiddleware
 
 from roboqa_web.config import AppConfig, TomlAppConfig
-from roboqa_web.runners.runner_bg import handle_publish_issue_to_github
-
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+from roboqa_web.runners.tasks import handle_publish_issue_to_github
 
 
 def get_app_config() -> AppConfig:
@@ -27,7 +25,7 @@ def get_app_config() -> AppConfig:
 class GithubProjectInfo(TypedDict):
     owner: str
     project_id: int
-    project_node: str
+    project_api_id: str
 
 
 def get_github_project_info(
@@ -79,9 +77,9 @@ class GithubProjectsService:
         result = await self._gh_client.execute(
             create_issue_mutation,
             variable_values={
-                'project_id': self.project_info['project_node'],
-                'title': title,
-                'body': content
+                "project_id": self.project_info['project_api_id'],
+                "title": title,
+                "body": content
             }
         )
 
@@ -143,10 +141,10 @@ issues_router = APIRouter(prefix="/api/v1/issues")
 
 
 class FeedbackRequestDto(BaseModel):
-    title:      str
-    authorName: Optional[str]  = Field(default=None)
-    isIssue:    Optional[bool] = Field(default=None)
-    content:    Optional[str]  = Field(default=None)
+    title: str
+    authorName: Optional[str] = Field(default=None)
+    isIssue: Optional[bool] = Field(default=None)
+    content: Optional[str] = Field(default=None)
 
 
 @issues_router.get("/bg")
@@ -185,14 +183,19 @@ def setup_app_composer() -> FastAPI:
 
 
 async def run_async():
-    app_config = uvicorn.Config("roboqa_web.main:setup_app_composer", host='0.0.0.0', port=5000, log_level="debug")
+    app_config = uvicorn.Config(
+        "roboqa_web.runners.api:setup_app_composer",
+        host='0.0.0.0', port=5000,
+        log_level="debug"
+    )
     app_runner = uvicorn.Server(app_config)
-
 
     await app_runner.serve()
 
 
 def run():
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
     asyncio.run(run_async())
 
 

@@ -15,13 +15,17 @@ async def command_start_handler(message: Message) -> None:
     await message.answer(f"Hello, {hbold(message.chat.id)}!")
 
 
-async def main_async():
+async def run_async():
     tg_bot = Bot('')
 
     await dp.start_polling(tg_bot)
 
 
-if __name__ == "__main__":
+def run():
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
-    asyncio.run(main_async())
+    asyncio.run(run_async())
+
+
+if __name__ == "__main__":
+    run()

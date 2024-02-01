@@ -2,35 +2,64 @@
 
 ```shell
 poetry install
-poetry shell
 ```
 
+### Команды запуска
+
+Сервис фоновых задач
+
 ```shell
-poetry run uvicorn roboqa_web.main:app --reload
+dramatiq roboqa_web.runners.tasks:run
 ```
+
+Сервис REST API
+
+```shell
+python -m roboqa_web.runners.api
+```
+
+Сервис телеграмм-бота
+
+```shell
+python -m roboqa_web.runners.bot
+```
+
 
 ### Функции
 
-- [ ] API для получения простого фидбека
-- [ ] Интеграция с беклогом доски на github
-- [ ] Оповещение в telegram dev-группу проекта
+- [ ] API для регистрации сообщения о проблеме
+- [ ] Интеграция с беклогом на github
+- [ ] Оповещение в telegram группу проекта
 - [ ] Напоминание о дежурстве для ручного прогона use case'ов
 
 ### Конфигурация
 
+Осуществляется через файл `config.toml` в директории запуска модулей
+
 ```toml
+[infrastructure.data.redis]
+# Строка подключения к Redis
+connection_string = 'redis://localhost:6379'
+
 [integrations.telegram]
+# Ключ доступа к Telegram Bot API
 api_key = ''
+# Идентификатор группы (chat_id) для отправки сообщений о проблеме
 group_id = 0
 
 [integrations.github]
+# Ключ доступа к Github GraphQL API
 api_key = ''
 
 [integrations.github.project]
-owner = ''
+# Владелец доски, используется для формирования URL
+owner = 'orgs/EXAMPLE'
+# Идентификатор доски владельца`, используется для формирования URL
 project_id = 0
-project_node = ''
+# Идентификатор доски на API 
+project_api_id = ''
 
-[jobs.daily_duty]
+[jobs.remind_duty]
+# CRON выражения для регулярной задачи "Напоминание о Дежурстве"
 cron = '0,30 09,16 * * 1-5'
 ```

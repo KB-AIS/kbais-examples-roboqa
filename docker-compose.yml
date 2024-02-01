@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  roboqa.infra.data.redis:
+    image: redis/redis-stack:7.2.0-v8
+    container_name: roboqa.infra.data.redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+
+  roboqa.services.tasks:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    image: roboqa.services:0.0.1
+    container_name: roboqa.service.tasks
+    restart: unless-stopped
+    # work in few threads
+    command: dramatiq roboqa_web.runners.tasks
+    depends_on:
+      - roboqa.infra.data.redis
+
+  roboqa.services.api:
+    image: roboqa.services:0.0.1
+    container_name: roboqa.service.api
+    restart: unless-stopped
+    # work in few threads
+    command: python -m roboqa_web.runners.api
+    expose:
+      - 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - roboqa.services.tasks
+      - roboqa.infra.data.redis
