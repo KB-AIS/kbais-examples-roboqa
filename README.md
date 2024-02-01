@@ -58,9 +58,9 @@ python -m roboqa_web.runners.bot
 Осуществляется через файл `config.toml` в директории запуска модулей
 
 ```toml
-[infrastructure.data.redis]
+[infrastructure.data]
 # Строка подключения к Redis
-connection_string = 'redis://localhost:6379'
+redis_url = 'redis://localhost:6379'
 
 [integrations.telegram]
 # Ключ доступа к Telegram Bot API
