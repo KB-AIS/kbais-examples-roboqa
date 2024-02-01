@@ -5,7 +5,7 @@ ENV POETRY_CACHE_DIR=/tmp/poetry_cache
 
 RUN pip install poetry==1.7.1
 
-COPY pyproject.toml poetry.lock ./
+COPY ../pyproject.toml poetry.lock ./
 RUN touch README.md
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR \
@@ -19,4 +19,4 @@ COPY --from=builder /app .
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-COPY ./packages/roboqa_web ./roboqa_web
+COPY ../packages/roboqa_web ./roboqa_web

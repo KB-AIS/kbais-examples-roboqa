@@ -12,7 +12,7 @@ services:
   roboqa.services.tasks:
     build:
       dockerfile: Dockerfile
-      context: ./
+      context: ..
     image: roboqa.services:0.0.1
     container_name: roboqa.service.tasks
     restart: unless-stopped
