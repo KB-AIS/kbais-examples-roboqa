@@ -14,11 +14,11 @@ class ContainerApi(containers.DeclarativeContainer):
 
     # Domain
 
-    issue_repository = providers.Factory(RedisIssueRepository, redis=core.redis_pool)
+    issue_repository = providers.Factory(RedisIssueRepository, redis=core.redis_async)
 
     # Application -> Domain
 
-    issue_sender = providers.Singleton(WorkerIssueSender)
+    issue_sender = providers.Singleton(WorkerIssueSender, broker=core.dq_broker)
 
     issue_register_uc: Factory[IssueRegisterUseCase] = providers.Factory(
         IssueRegisterUseCase,

@@ -1,5 +1,6 @@
 from typing import Optional
 
+import dramatiq
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, APIRouter
 from pydantic import Field, BaseModel

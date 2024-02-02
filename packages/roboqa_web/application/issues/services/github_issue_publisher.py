@@ -1,7 +1,6 @@
-from typing import TypedDict
-
 from gql import gql
 from gql.client import AsyncClientSession
+from typing_extensions import TypedDict
 
 from roboqa_web.domain.issues.issue import Issue
 

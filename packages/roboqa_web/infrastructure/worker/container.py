@@ -1,11 +1,13 @@
-from typing import TypedDict, AsyncIterator
+from typing import AsyncIterator
 
 from aiogram import Bot
 from aiogram.enums import ParseMode
 from dependency_injector import containers, providers
+from dramatiq.rate_limits import ConcurrentRateLimiter
 from gql.client import Client, AsyncClientSession
 from gql.transport.aiohttp import AIOHTTPTransport
 from pydantic import TypeAdapter
+from typing_extensions import TypedDict
 
 from roboqa_web.application.issues.services.github_issue_publisher import GithubIssuePublisher, GithubProjectOptions
 from roboqa_web.application.issues.services.telegram_issue_publisher import TelegramIssuePublisher, TelegramGroupOptions
@@ -19,7 +21,7 @@ class GithubClientOptions(TypedDict):
     api_key: str
 
 
-async def setup_github_client_session(
+async def _setup_github_client_session(
         opts: GithubClientOptions
 ) -> AsyncIterator[AsyncClientSession]:
     github_client_transport = AIOHTTPTransport(
@@ -33,22 +35,26 @@ async def setup_github_client_session(
         yield session
 
 
-def setup_tg_client(api_key: str) -> Bot:
+def _setup_tg_client(api_key: str) -> Bot:
     return Bot(api_key, parse_mode=ParseMode.HTML)
 
 
 class ContainerWorker(containers.DeclarativeContainer):
     core = providers.Container(ContainerCore)
 
-    wiring_config = containers.WiringConfiguration(packages=["roboqa_web.infrastructure.worker"])
-
-    __self__ = providers.Self()
+    # wiring_config = containers.WiringConfiguration(packages=["roboqa_web.infrastructure.worker"])
 
     # Domain
 
-    issue_repository = providers.Factory(RedisIssueRepository, redis=core.redis_pool)
+    issue_repository = providers.Factory(RedisIssueRepository, redis=core.redis_async)
 
-    # Application -> Domain
+    dq_issue_publish_rl = providers.Singleton(
+        ConcurrentRateLimiter,
+        backend=core.dq_rate_limit_backend,
+        key="issue-publish-mux", limit=2, ttl=1_000
+    )
+
+    # Application
 
     gh_project_opts = providers.Singleton(
         TypeAdapter(GithubProjectOptions).validate_python,
@@ -61,7 +67,7 @@ class ContainerWorker(containers.DeclarativeContainer):
     )
 
     gh_client = providers.Resource(
-        setup_github_client_session,
+        _setup_github_client_session,
         opts=gh_client_opts
     )
 
@@ -72,7 +78,7 @@ class ContainerWorker(containers.DeclarativeContainer):
     )
 
     tg_client = providers.Singleton(
-        setup_tg_client,
+        _setup_tg_client,
         api_key=core.config.integrations.telegram.api_key
     )
 

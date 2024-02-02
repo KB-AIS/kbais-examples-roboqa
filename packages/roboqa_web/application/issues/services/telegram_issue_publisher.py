@@ -1,14 +1,16 @@
 import logging
-from typing import TypedDict
+from typing import Optional
 
 from aiogram import Bot
 from aiogram.types import LinkPreviewOptions
+from typing_extensions import TypedDict
 
 from roboqa_web.domain import Issue
 
 
 class TelegramGroupOptions(TypedDict):
     tg_id: int
+    topic_id: Optional[int]
 
 
 class TelegramIssuePublisher:
@@ -23,8 +25,8 @@ class TelegramIssuePublisher:
             text=f"<b>Проблема от {issue.author}: {issue.title}</b>\n\n"
                  f"{issue.content}\n\n"
                  f"<a href='{issue.url}'>Ссылка на GH</a>",
-            message_thread_id=2,
+            message_thread_id=self._opts['topic_id'],
             link_preview_options=LinkPreviewOptions(is_disabled=True)
         )
 
-        logging.info("Issue message has been published: %message_id", message.message_id)
+        logging.info("Issue has been published to Telegram, message id: %s", message.message_id)

@@ -12,12 +12,13 @@ services:
   roboqa.services.tasks:
     build:
       dockerfile: Dockerfile
-      context: ..
+      context: ./
     image: roboqa.services:0.0.1
     container_name: roboqa.service.tasks
     restart: unless-stopped
-    # work in few threads
-    command: dramatiq roboqa_web.runners.worker.runner:run
+    volumes:
+      - ./config.dev.toml:/app/config.toml
+    command: dramatiq roboqa_web.runners.worker.runner
     depends_on:
       - roboqa.infra.data.redis
 
@@ -25,7 +26,8 @@ services:
     image: roboqa.services:0.0.1
     container_name: roboqa.service.api
     restart: unless-stopped
-    # work in few threads
+    volumes:
+      - ./config.dev.toml:/app/config.toml
     command: python -m roboqa_web.runners.web.runner
     expose:
       - 5000
