@@ -10,6 +10,11 @@ from aiogram.utils.markdown import hbold
 dp = Dispatcher()
 
 
+@dp.update()
+async def handle(message: Message):
+    ...
+
+
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     await message.answer(f"Hello, {hbold(message.chat.id)}!")

@@ -8,7 +8,7 @@ class Issue(BaseModel):
     id: str = Field(default_factory=lambda: uuid4().hex)
     title: str = Field()
     author: Optional[str] = Field(default=None, serialization_alias='authorName')
-    content: Optional[str] = Field(default=None)
+    content: str = Field(default="")
     url: Optional[str] = Field(default=None)
 
     def __eq__(self, other: Any) -> bool:

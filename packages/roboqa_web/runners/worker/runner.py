@@ -10,15 +10,13 @@ from roboqa_web.infrastructure.worker.tasks import issue_publish_tg_task, issue_
 
 
 def run():
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-    container = ContainerWorker()
+    runner_container = ContainerWorker()
 
-    broker = RedisBroker(url=container.config.get("infrastructure.data.redis_url"))
+    runner_composer = RedisBroker(url=runner_container.core.config.get("infrastructure.data.redis_url"))
+    runner_composer.add_middleware(AsyncIO())
+    runner_composer.declare_actor(issue_publish_tg_task)
+    runner_composer.declare_actor(issue_publish_gh_task)
 
-    broker.add_middleware(AsyncIO())
-
-    broker.declare_actor(issue_publish_tg_task)
-    broker.declare_actor(issue_publish_gh_task)
-
-    dramatiq.set_broker(broker)
+    dramatiq.set_broker(runner_composer)

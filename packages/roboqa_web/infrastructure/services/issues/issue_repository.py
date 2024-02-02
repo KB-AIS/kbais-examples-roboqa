@@ -19,7 +19,7 @@ class RedisIssueRepository(IssueRepository):
         data = await self._redis.json().get(_get_id(id))
 
         if data is not None:
-            return Issue.model_validate_json(data)
+            return Issue.model_validate(data)
 
         return None
 

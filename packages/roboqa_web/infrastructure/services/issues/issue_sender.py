@@ -4,5 +4,5 @@ from roboqa_web.infrastructure.worker.tasks import issue_publish_gh_task
 
 class WorkerIssueSender(IssueSender):
 
-    def issue_registered(self, issue_id: str) -> None:
+    def registered(self, issue_id: str) -> None:
         issue_publish_gh_task.send(issue_id)

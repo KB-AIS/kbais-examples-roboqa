@@ -1,5 +1,5 @@
 import tomllib
-from typing import TypedDict, AsyncIterator
+from typing import AsyncIterator
 
 import redis.asyncio as r
 from dependency_injector import containers, providers
@@ -21,22 +21,12 @@ async def get_redis_pool(url: str) -> AsyncIterator[r.Redis]:
 
 class ContainerCore(containers.DeclarativeContainer):
     config = providers.Configuration()
+
     config.from_dict(_load_config())
+
+    # Infrastructure
 
     redis_pool = providers.Resource(
         get_redis_pool,
         url=config.infrastructure.data.redis_url
     )
-
-
-class Config(containers.DeclarativeContainer):
-    config = providers.Configuration()
-
-
-class GithubClientOptions(TypedDict):
-    api_key: str
-
-
-class TelegramClientOptions(TypedDict):
-    api_key: str
-    group_id: int

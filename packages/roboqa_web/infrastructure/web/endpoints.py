@@ -6,7 +6,7 @@ from pydantic import Field, BaseModel
 from starlette import status
 
 from roboqa_web.application.core.usecase import UseCase
-from roboqa_web.application.usecases.issue_register import IssueRegisterCommand
+from roboqa_web.application.issues.usecases.issue_register import IssueRegisterCommand
 from roboqa_web.infrastructure.web.container import ContainerApi
 
 issues_router = APIRouter(prefix="/api/v1/issues")
@@ -33,5 +33,5 @@ async def handle_issue_register(
     ))
 
     return {
-        "issue_id": issue_id
+        "issueId": issue_id
     }
