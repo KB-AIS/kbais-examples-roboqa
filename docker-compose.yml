@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  roboqa.infra.data.redis:
+  redis:
     image: redis/redis-stack:7.2.0-v8
     container_name: roboqa.infra.data.redis
     restart: unless-stopped
@@ -9,7 +9,7 @@ services:
       - "6379:6379"
       - "8001:8001"
 
-  roboqa.services.tasks:
+  tasks:
     build:
       dockerfile: Dockerfile
       context: ./
@@ -22,7 +22,7 @@ services:
     depends_on:
       - roboqa.infra.data.redis
 
-  roboqa.services.api:
+  api:
     image: roboqa.services:0.0.1
     container_name: roboqa.service.api
     restart: unless-stopped
@@ -30,9 +30,9 @@ services:
       - ./config.dev.toml:/app/config.toml
     command: python -m roboqa_web.runners.web.runner
     expose:
-      - 5000
+      - 2099
     ports:
-      - "5000:5000"
+      - "2099:2099"
     depends_on:
       - roboqa.services.tasks
       - roboqa.infra.data.redis

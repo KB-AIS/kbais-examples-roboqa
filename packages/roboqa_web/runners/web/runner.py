@@ -26,7 +26,7 @@ async def run_async():
 
     runner = uvicorn.Server(uvicorn.Config(
         "roboqa_web.runners.web.runner:make_runner_composer",
-        host='0.0.0.0', port=5000,
+        host='0.0.0.0', port=2099,
         log_level="debug"
     ))
 
