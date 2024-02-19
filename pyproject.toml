@@ -18,6 +18,7 @@ gql = {extras = ["aiohttp"], version = "^3.5.0"}
 redis = "^5.0.1"
 dependency-injector-fork = "^4.42.1"
 dramatiq = {extras = ["redis", "watch"], version = "^1.16.0"}
+markdownify = "^0.11.6"
 
 [build-system]
 requires = ["poetry-core"]

@@ -36,7 +36,7 @@ async def _setup_github_client_session(
 
 
 def _setup_tg_client(api_key: str) -> Bot:
-    return Bot(api_key, parse_mode=ParseMode.HTML)
+    return Bot(api_key, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 class ContainerWorker(containers.DeclarativeContainer):

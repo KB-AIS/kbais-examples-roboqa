@@ -4,6 +4,7 @@ from typing import Optional
 from aiogram import Bot
 from aiogram.types import LinkPreviewOptions
 from typing_extensions import TypedDict
+from markdownify import markdownify as md
 
 from roboqa_web.domain import Issue
 
@@ -20,11 +21,15 @@ class TelegramIssuePublisher:
         self._client = client
 
     async def publish(self, issue: Issue) -> None:
+        message_text = md(
+            f"<b>Проблема от {issue.author}: {issue.title}</b>\n\n"
+            f"{issue.content}\n\n"
+            f"<a href='{issue.url}'>Ссылка на GH</a>"
+        )
+
         message = await self._client.send_message(
             self._opts['tg_id'],
-            text=f"<b>Проблема от {issue.author}: {issue.title}</b>\n\n"
-                 f"{issue.content}\n\n"
-                 f"<a href='{issue.url}'>Ссылка на GH</a>",
+            text=message_text,
             message_thread_id=self._opts['topic_id'],
             link_preview_options=LinkPreviewOptions(is_disabled=True)
         )
